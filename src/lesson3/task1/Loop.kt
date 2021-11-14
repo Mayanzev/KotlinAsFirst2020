@@ -121,11 +121,10 @@ fun minDivisor(n: Int): Int {
  */
 fun maxDivisor(n: Int): Int {
     val num = n - 1
-    if (n > 1)
-        for (i in num downTo 1)
-            if (n % i == 0) {
-                return i
-            }
+    for (i in num downTo 1)
+        if (n % i == 0) {
+            return i
+        }
     return 2
 
 }
@@ -192,6 +191,7 @@ fun isCoPrime(m: Int, n: Int): Boolean {
     }
     return numFirst + numSecond == 1
 }
+
 /**
  * Средняя (3 балла)
  *
@@ -211,9 +211,8 @@ fun squareBetweenExists(m: Int, n: Int): Boolean = TODO()
 fun revert(n: Int): Int {
     var reversionNumb = 0
     var numb = n
-    var dig: Int
     while (numb >= 1) {
-        dig = (numb % 10)
+        val dig = (numb % 10)
         reversionNumb = reversionNumb * 10 + dig
         numb /= 10
     }
@@ -238,8 +237,7 @@ fun isPalindrome(n: Int): Boolean {
         reversionNumb = reversionNumb * 10 + dig
         numb /= 10
     }
-return (n == reversionNumb)
-
+    return (n == reversionNumb)
 }
 
 /**
