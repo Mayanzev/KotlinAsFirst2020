@@ -109,6 +109,7 @@ fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> {
     return result
 }
 
+
 /**
  * Простая (2 балла)
  *
@@ -119,8 +120,12 @@ fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> {
  *   containsIn(mapOf("a" to "z"), mapOf("a" to "z", "b" to "sweet")) -> true
  *   containsIn(mapOf("a" to "z"), mapOf("a" to "zee", "b" to "sweet")) -> false
  */
-fun containsIn(a: Map<String, String>, b: Map<String, String>) = b.entries.containsAll(a.entries)
+fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean {
+    for (key in a.keys)
+        if (a[key] != b[key]) return false
+    return true
 
+}
 
 /**
  * Простая (2 балла)
@@ -137,7 +142,10 @@ fun containsIn(a: Map<String, String>, b: Map<String, String>) = b.entries.conta
  *     -> a changes to mutableMapOf() aka becomes empty
  */
 fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>) {
-    for ((key, value) in b) a.remove(key, value)
+    for ((key) in b)
+        if (a[key] == b[key]) {
+            a.remove(key)
+        }
 }
 
 /**
@@ -188,10 +196,21 @@ fun mergePhoneBooks(mapA: Map<String, String>, mapB: Map<String, String>): Map<S
  *     -> mapOf("MSFT" to 150.0, "NFLX" to 40.0)
  */
 fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Double> {
-    val result = mutableMapOf<String, Double>()
-    val temp = stockPrices.groupBy({ it.first }, { it.second })
-    temp.forEach { (k, v) -> result += Pair(k, mean(v)) }
-    return result
+    val count = mutableMapOf<String, Int>()
+    val result = mutableMapOf<String, MutableList<Double>>()
+    val avgCost = mutableMapOf<String, Double>()
+    for ((name, cost) in stockPrices) {
+        count[name] = (count[name] ?: 0) + 1
+        if (name !in result) {
+            result[name] = mutableListOf(cost)
+        } else {
+            result[name]!!.add(cost)
+        }
+    }
+    for ((name, cost) in result) {
+        avgCost[name] = cost.sum() / count[name]!!
+    }
+    return avgCost
 }
 
 /**
@@ -210,14 +229,12 @@ fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Doub
  *   ) -> "Мария"
  */
 fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): String? {
-    var minimumPrice = Double.MAX_VALUE
     var result: String? = null
-    for ((name, kindCost) in stuff) {
-        if (kindCost.first == kind) {
-            if (kindCost.second <= minimumPrice) {
-                minimumPrice = kindCost.second
-                result = name
-            }
+    var minValue = Double.MAX_VALUE
+    for ((name, value) in stuff) {
+        if ((value.first == kind) && (value.second <= minValue)) {
+            minValue = value.second
+            result = name
         }
     }
     return result
@@ -323,13 +340,16 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
 fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
-    val listInMap = mutableMapOf<Int, Int>()
-    list.forEachIndexed { index, i ->
-        if (listInMap.containsKey(number - i)) return Pair(listInMap[number - i]!!, index)
-        listInMap += Pair(i, index)
+    val map = mutableMapOf<Int, Int>()
+    for (i in list.indices) {
+        if (map[number - list[i]] != null) {
+            return Pair(map[number - list[i]]!!, i)
+        }
+        map[list[i]] = i
     }
-    return -1 to -1
+    return Pair(-1, -1)
 }
+
 
 /**
  * Очень сложная (8 баллов)

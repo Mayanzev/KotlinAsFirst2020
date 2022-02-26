@@ -4,7 +4,6 @@ package lesson4.task1
 
 import lesson1.task1.discriminant
 import lesson3.task1.digitNumber
-import lesson3.task1.exponentiation
 import kotlin.math.sqrt
 
 // Урок 4: списки
@@ -123,11 +122,11 @@ fun buildSumExample(list: List<Int>) = list.joinToString(separator = " + ", post
  * Модуль пустого вектора считать равным 0.0.
  */
 fun abs(v: List<Double>): Double {
-    var ab = 0.0
+    var sqrIndex = 0.0
     for (i in 0 until v.size) {
-        ab += v[i] * v[i]
+        sqrIndex += v[i] * v[i]
     }
-    return sqrt(ab)
+    return sqrt(sqrIndex)
 }
 
 /**
@@ -135,8 +134,11 @@ fun abs(v: List<Double>): Double {
  *
  * Рассчитать среднее арифметическое элементов списка list. Вернуть 0.0, если список пуст
  */
-fun mean(list: List<Double>): Double = if (list.isEmpty()) 0.0
-else list.sum() / list.size
+fun mean(list: List<Double>): Double {
+    if (list.isNotEmpty())
+        return list.sum() / list.size
+    return 0.0
+}
 
 /**
  * Средняя (3 балла)
@@ -148,12 +150,11 @@ else list.sum() / list.size
  */
 fun center(list: MutableList<Double>): MutableList<Double> {
     val mean = mean(list)
-    for (i in 0 until list.size) {
+    for (i in 0 until list.size)
         list[i] -= mean
-    }
     return list
-}
 
+}
 
 /**
  * Средняя (3 балла)
@@ -180,8 +181,10 @@ fun times(a: List<Int>, b: List<Int>): Int {
  */
 fun polynom(p: List<Int>, x: Int): Int {
     var s = 0
+    var pow = 1
     for (i in 0 until p.size) {
-        s += p[i] * exponentiation(i, x)
+        s += p[i] * pow
+        pow *= x
     }
     return s
 }
@@ -211,17 +214,16 @@ fun accumulate(list: MutableList<Int>): MutableList<Int> {
  * Множители в списке должны располагаться по возрастанию.
  */
 fun factorize(n: Int): List<Int> {
-    var n1 = n
+    var numb = n
     val result = mutableListOf<Int>()
-    var del = 2
-    while (del * del <= n1) {
-        if (n1 % del == 0) {
-            result.add(del)
-            n1 /= del
-        } else del++
-    }
-    if (n1 > 1) result.add(n1)
+    var d = 2
+    while (numb > 1)
+        if (numb % d == 0) {
+            numb /= d
+            result += d
+        } else d++
     return result
+
 }
 
 /**
@@ -241,14 +243,14 @@ fun factorizeToString(n: Int): String = factorize(n).joinToString(separator = "*
  * например: n = 100, base = 4 -> (1, 2, 1, 0) или n = 250, base = 14 -> (1, 3, 12)
  */
 fun convert(n: Int, base: Int): List<Int> {
-    var n1 = n
-    val list = mutableListOf<Int>()
-    if (n1 == 0) return listOf(0)
-    while (n1 > 0) {
-        list.add(n1 % base)
-        n1 /= base
+    var numb = n
+    val result = mutableListOf<Int>()
+    if (numb == 0) return listOf(0)
+    while (numb > 0) {
+        result.add(numb % base)
+        numb /= base
     }
-    return list.reversed()
+    return result.reversed()
 }
 
 /**
@@ -263,12 +265,14 @@ fun convert(n: Int, base: Int): List<Int> {
  * (например, n.toString(base) и подобные), запрещается.
  */
 fun convertToString(n: Int, base: Int): String {
+    val alphabets = ('a'..'z').toMutableList()
     var result = ""
-    val letters = "abcdefghijklmnopqrstuvwxyz"
-    for (element in convert(n, base)) {
-        if (element < 10) {
-            result += element
-        } else result += letters[element - 10]
+    val elem = convert(n, base)
+    for (i in elem.indices) {
+        val z = elem[i]
+        if (z in 0..9) {
+            result += z
+        } else result += alphabets[z - 10]
     }
     return result
 }
@@ -327,18 +331,19 @@ fun decimalFromString(str: String, base: Int): Int {
  * Например: 23 = XXIII, 44 = XLIV, 100 = Ca
  */
 fun roman(n: Int): String {
-    var n1 = n
-    val romanNumbers = listOf("I", "IV", "V", "IX", "X", "XL", "L", "XC", "C", "CD", "D", "CM", "M")
-    val arabianNumbers = listOf(1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000)
-    var result = ""
-    for (i in arabianNumbers.size - 1 downTo 0) {
-        while (n1 >= arabianNumbers[i]) {
-            n1 -= arabianNumbers[i]
-            result += romanNumbers[i]
+    var numb = n
+    var dig = ""
+    val romanNumbers = listOf("M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I")
+    val arabicNumbers = listOf(1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1)
+    for (i in arabicNumbers.indices) {
+        while (numb >= arabicNumbers[i]) {
+            numb -= arabicNumbers[i]
+            dig += romanNumbers[i]
         }
     }
-    return result
+    return dig
 }
+
 /**
  * Очень сложная (7 баллов)
  *

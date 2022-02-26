@@ -2,7 +2,9 @@
 
 package lesson6.task1
 
-import java.util.concurrent.TimeoutException
+import kotlinx.html.InputType
+import lesson2.task2.daysInMonth
+import lesson4.task1.abs
 
 // Урок 6: разбор строк, исключения
 // Максимальное количество баллов = 13
@@ -75,7 +77,39 @@ fun main() {
  * Обратите внимание: некорректная с точки зрения календаря дата (например, 30.02.2009) считается неверными
  * входными данными.
  */
-fun dateStrToDigit(str: String): String = TODO()
+
+val months = listOf(
+    "января",
+    "февраля",
+    "марта",
+    "апреля",
+    "мая",
+    "июня",
+    "июля",
+    "августа",
+    "сентября",
+    "октября",
+    "ноября",
+    "декабря"
+)
+
+fun dateStrToDigit(str: String): String {
+
+    if (!str.matches(Regex("\\d+ ([а-я])+ \\d+"))) return ""
+
+    val parts = str.split(" ")
+    val day = parts[0].toInt()
+    val year = parts[2].toInt()
+    val month: Int
+
+    if (months.indexOf(parts[1]) != -1) {
+        month = (months.indexOf(parts[1]) + 1)
+    } else return ""
+
+    return if (daysInMonth(month, year) >= day) {
+        String.format("%02d.%02d.%d", day, month, year)
+    } else ""
+}
 
 /**
  * Средняя (4 балла)
@@ -87,7 +121,22 @@ fun dateStrToDigit(str: String): String = TODO()
  * Обратите внимание: некорректная с точки зрения календаря дата (например, 30 февраля 2009) считается неверными
  * входными данными.
  */
-fun dateDigitToStr(digital: String): String = TODO()
+fun dateDigitToStr(digital: String): String {
+
+    if (!digital.matches(Regex("\\d+\\.\\d+\\.\\d+"))) return ""
+
+    val parts = digital.split(".")
+
+    if (parts[1].toInt() !in 1..12) return ""
+
+    val day = parts[0].toInt()
+    val month = months[parts[1].toInt() - 1]
+    val year = parts[2].toInt()
+
+    if ((daysInMonth(parts[1].toInt(), year) >= day))
+        return String.format("%d %s %d", day, month, year)
+    return ""
+}
 
 /**
  * Средняя (4 балла)
@@ -116,16 +165,13 @@ fun flattenPhoneNumber(phone: String): String = TODO()
  * При нарушении формата входной строки или при отсутствии в ней чисел, вернуть -1.
  */
 fun bestLongJump(jumps: String): Int {
-    val allowedDigits = setOf("%", "-")
-    val parts = jumps.split(Regex("\\s+"))
-    val onlySuccessAttempts = mutableListOf<Int>()
-    val jumpList = parts.toMutableList()
-    jumpList.forEach {
-        if (it.toIntOrNull() != null) {
-            onlySuccessAttempts.add(it.toIntOrNull()!!)
-        } else if (!allowedDigits.contains(it)) return -1
-    }
-    return onlySuccessAttempts.maxByOrNull { it } ?: -1
+
+    if (!jumps.matches(Regex("\\d+[ %-]* [ \\d%-]*"))) return -1
+
+    val parts = jumps.split(" ", "-", "%").filter { it != "" }
+    val max = parts.maxOrNull()?.toInt()
+
+    return max!!
 }
 
 /**
@@ -140,22 +186,12 @@ fun bestLongJump(jumps: String): Int {
  * вернуть -1.
  */
 fun bestHighJump(jumps: String): Int {
+    if (!jumps.matches((Regex("""\d+ \+[ \+\-\%\d]*""")))) return -1
     val parts = jumps.split(" ")
-    val someAttempts = mutableListOf<Int>()
-    val onlyFailAttempts = mutableListOf<Int>()
-    val someSymbols = mutableListOf<String>()
-    val jump = parts.toMutableList()
-    if (!Regex("(^(\\d+ [[+|-]|%]+)( \\d+ [[+|-]|%]+)+)|\\d+ [[+|-]|%]+").matches(jumps)) return -1
-    jump.forEach {
-        if (it.toIntOrNull() != null) {
-            someAttempts.add(it.toIntOrNull()!!)
-        } else someSymbols.add(it)
-    }
-    someSymbols.forEachIndexed { index, s ->
-        if (!s.contains('+')) onlyFailAttempts.add(someAttempts[index])
-    }
-    someAttempts.removeAll(onlyFailAttempts)
-    return someAttempts.maxByOrNull { it } ?: -1
+    var result = -1
+    for (i in 0..parts.size - 1 step 2)
+        if ('+' in parts[i + 1] && (parts[i].toInt() > result)) result = parts[i].toInt()
+    return result
 }
 
 /**
@@ -167,7 +203,25 @@ fun bestHighJump(jumps: String): Int {
  * Вернуть значение выражения (6 для примера).
  * Про нарушении формата входной строки бросить исключение IllegalArgumentException
  */
-fun plusMinus(expression: String): Int = TODO()
+fun plusMinus(expression: String): Int {
+
+    if (!expression.matches(Regex("""(\d* [+-]* \d+)+|\d+"""))) throw IllegalArgumentException()
+
+    val parts = expression.split(" ")
+    var result = parts[0].toInt()
+
+
+    for (i in 1..parts.size - 1 step 2) {
+        if (i + 1 < parts.size) {
+            val digit = parts[i + 1]
+            val sign = parts[i]
+            if (sign == "+") {
+                result += digit.toInt()
+            } else result -= digit.toInt()
+        } else result += parts[i].toInt(); println(result)
+    }
+    return result
+}
 
 /**
  * Сложная (6 баллов)

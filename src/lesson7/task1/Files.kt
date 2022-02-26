@@ -63,12 +63,17 @@ fun alignFile(inputName: String, lineLength: Int, outputName: String) {
  * Подчёркивание в середине и/или в конце строк значения не имеет.
  */
 fun deleteMarked(inputName: String, outputName: String) {
-    File(outputName).bufferedWriter().use {
-        File(inputName).forEachLine { string ->
-            if (!string.startsWith("_") || string.isEmpty())
-                it.appendLine(string)
+
+    val file = File(inputName).readLines()
+    val writer = File(outputName).bufferedWriter()
+
+    for (line in file) {
+        if (line.isEmpty() || line[0] != '_') {
+            writer.write(line); println(line)
+            writer.newLine()
         }
     }
+    writer.close()
 }
 
 /**
@@ -138,13 +143,18 @@ fun sibilants(inputName: String, outputName: String) {
  *
  */
 fun centerFile(inputName: String, outputName: String) {
-    val text = File(inputName).bufferedReader().readLines().map { it.trim() }
-    val maxLength = text.maxOfOrNull { it.length } ?: 0
-    File(outputName).bufferedWriter().use {
-        text.forEach { s ->
-            it.appendLine(" ".repeat((maxLength - s.length) / 2) + s)
-        }
+
+    val file = File(inputName).readLines()
+    val text = file.map { it.trim() }; println(text)
+    val lengthMaxLine = text.maxOfOrNull { it.length } ?: 0; println(lengthMaxLine)
+    val writer = File(outputName).bufferedWriter()
+
+    for (line in text) {
+        for (i in 1..(lengthMaxLine - line.length) / 2) writer.write(" ")
+        writer.write(line); println(line)
+        writer.newLine()
     }
+    writer.close()
 }
 
 /**
@@ -175,33 +185,43 @@ fun centerFile(inputName: String, outputName: String) {
  * 8) Если входной файл удовлетворяет требованиям 1-7, то он должен быть в точности идентичен выходному файлу
  */
 fun alignFileByWidth(inputName: String, outputName: String) {
-    val text = File(inputName).bufferedReader().readLines().map { it.trim() }
-    val maxLength = text.maxOfOrNull { it.length } ?: 0
-    val regex = " +".toRegex()
-    File(outputName).bufferedWriter().use {
-        text.forEach { str ->
-            val x = str.replace(regex, " ")
-            var spaceCounter = maxLength.toDouble() - x.length.toDouble()
-            var k = 1
-            x.forEach { char ->
-                if (char == ' ') k += 1
-            }
-            if (x.length != maxLength) {
-                val stringWithSpaces = StringBuilder()
-                x.forEach { char ->
-                    if (char == ' ') {
-                        var numberOfSpaces = (spaceCounter / (k - 1)).toInt()
-                        if ((spaceCounter).toInt() % (k - 1) > 0) numberOfSpaces += 1
-                        stringWithSpaces.append(" ".repeat(numberOfSpaces + 1))
-                        spaceCounter -= numberOfSpaces
-                        k -= 1
-                    } else stringWithSpaces.append(char)
+
+    val file = File(inputName).readLines()
+    val writer = File(outputName).bufferedWriter()
+
+    val textLine = file.map { it.trim() }
+    val wordInTextLine = textLine.map { it.split(Regex("\\s+")) }
+    val lengthMaxLine = textLine.maxOfOrNull { it.length } ?: 0
+
+    writer.use {
+        for (line in wordInTextLine) {
+            if (line.isEmpty()) writer.newLine()
+            else if (line.size == 1) writer.appendLine(line[0])
+
+            else {
+                if (line.size != lengthMaxLine) {
+
+                    val countSpacesBeetwenWords = line.size - 1
+                    val lengthLine = line.sumOf { it.length }
+                    val spaceCounter = lengthMaxLine - lengthLine
+                    val spaceNumberNeededDistribute = (spaceCounter) / (countSpacesBeetwenWords)
+                    val remainSpace = (spaceCounter) % (countSpacesBeetwenWords)
+
+                    val result = StringBuilder()
+
+                    for (i in 0 until countSpacesBeetwenWords) {
+                        if (i < remainSpace) {
+                            result.append(line[i]).append(" ".repeat(spaceNumberNeededDistribute + 1))
+                        } else result.append(line[i]).append(" ".repeat(spaceNumberNeededDistribute))
+                    }
+                    result.append(line[countSpacesBeetwenWords])
+                    writer.appendLine(result.toString())
                 }
-                it.appendLine(stringWithSpaces)
-            } else it.appendLine(x)
+            }
         }
     }
 }
+
 
 /**
  * Средняя (14 баллов)
